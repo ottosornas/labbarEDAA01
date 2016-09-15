@@ -1,7 +1,6 @@
 package set;
 
 import java.util.NoSuchElementException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
@@ -23,15 +22,10 @@ public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
 	 *             if this set is empty
 	 */
 	public E getMax() {
-		if (!super.isEmpty()) {
-			while (super.iterator().hasNext()) {
-				if (super.iterator().next().compareTo(maxElement) < 0) {
-					maxElement = iterator().next();
-				}
-			}
+		if (!isEmpty()) {
 			return maxElement;
 		}
-		throw new NoSuchElementException();
+		throw new NoSuchElementException("Finns inget s�dan element tillagt");
 	}
 
 	/**
@@ -44,7 +38,7 @@ public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
 	 */
 	@Override
 	public boolean add(E x) {
-		if (maxElement == null || x.compareTo(maxElement) < 0) {
+		if (maxElement == null || x.compareTo(maxElement) > 0) {
 			maxElement = x;
 		}
 		return super.add(x);
@@ -58,12 +52,31 @@ public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
 	 *            the element to remove - if present
 	 * @return true if the set contained the specified element
 	 */
-	@Override
+
 	public boolean remove(Object x) {
-		if (x == maxElement) {
-			maxElement = null;
+
+		if (maxElement.equals(x)) {
+
+			if (size() == 1) {
+				maxElement = null;
+				super.remove(x);
+			} else {
+				super.remove(x);
+				Iterator<? extends E> itr = iterator();
+				E biggest = itr.next();
+				while (itr.hasNext()) {
+					E k = itr.next();
+					if (biggest.compareTo(k) < 0) {
+						biggest = k;
+					}
+				}
+				maxElement = biggest;
+			}
+			return true;
+
+		} else {
+			return super.remove(x);
 		}
-		return super.remove(x);
 	}
 
 	/**
@@ -78,57 +91,4 @@ public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
 		return super.addAll(c);
 	}
 
-	/**
-	 * Sorterar listan med unika tal och returnerar dem i stigande ordning
-	 * 
-	 * @param lista
-	 *            som ska bli sorterad
-	 * @return sorterad lista
-	 */
-	public static int[] uniqueElements(int[] ints) {
-		int temp;
-		boolean b = true;
-		ArrayList<Integer> list = new ArrayList<Integer>();
-
-		for (int i = 0; i < ints.length; i++) {
-			temp = ints[i];
-			for (int k = i + 1; k < ints.length; k++) {
-
-				if (temp == ints[k]) {
-					b = false;
-					break;
-				}
-			}
-			if (b) {
-				list.add(temp);
-			}
-			b = true;
-		}
-		return sortUnique(list);
-	}
-
-	/**
-	 * Sorterar vektorn med unika element i stigande ordning
-	 * 
-	 * @param osorterad 
-	 * 				lista med unika element           
-	 * @return en sorterad listas
-	 */
-	private static int[] sortUnique(ArrayList<Integer> list) {
-		int[] sorted = new int[list.size()];
-		for (int i = 0; i < list.size(); i++) {
-			sorted[i] = list.get(i);
-		}
-
-		for (int i = 1; i < sorted.length; i++) {
-			int nextVal = sorted[i];
-			int nextPos = i;
-			while (nextPos > 0 && nextVal < sorted[nextPos - 1]) {
-				sorted[nextPos] = sorted[nextPos - 1];
-				nextPos--;
-			}
-			sorted[nextPos] = nextVal;
-		}
-		return sorted;
-	}
 }
